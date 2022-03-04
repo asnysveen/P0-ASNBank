@@ -41,8 +41,11 @@ public class FileIntegrationTests extends PointWatcher {
 	
 	@BeforeClass
 	public static void setupFileLocations() {
-		UserDaoFile.fileLocation = "target/integrationTests/users";
-		AccountDaoFile.fileLocation = "target/integrationTests/accounts";
+		UserDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Users.txt";
+		AccountDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
+	
+//		UserDaoFile.fileLocation = "target/integrationTests/users";
+//		AccountDaoFile.fileLocation = "target/integrationTests/accounts";
 	}
 	
 	/*

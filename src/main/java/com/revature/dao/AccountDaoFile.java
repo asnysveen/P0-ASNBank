@@ -1,45 +1,164 @@
 package com.revature.dao;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.revature.beans.Account;
 import com.revature.beans.User;
 
+
 /**
  * Implementation of AccountDAO which reads/writes to files
  */
 public class AccountDaoFile implements AccountDao {
-	// use this file location to persist the data to
-	public static String fileLocation = "";
 
+	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
+	
+	public static List<Account> accountList = new ArrayList<Account>();
+	
+	
+	ObjectOutputStream objAccOut;
+	ObjectInputStream objAccIn;
+	
+	
+	
+	//create account based on user account: e.g., (userId + "-1") for checking or (userId + "-2") for savings
 	public Account addAccount(Account a) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		accountList = getAccounts();
+		
+		accountList.add(a);
+		
+		try {
+			objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objAccOut.writeObject(accountList);
+			System.out.println("Account Successfully Registered");
+			objAccOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found" + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("IOException:" + e.getMessage());
+		} 
+
+		return a;
 	}
+		
+		
 
 	public Account getAccount(Integer actId) {
-		// TODO Auto-generated method stub
+		
+		accountList = getAccounts();
+		
+		for (Account account : accountList) {
+			if (account.getId().equals(actId)) {
+				return account;
+			}
+		}
+		
 		return null;
 	}
 
+	
+	
+	@SuppressWarnings("unchecked")
 	public List<Account> getAccounts() {
-		// TODO Auto-generated method stub
+
+		try {
+			objAccIn = new ObjectInputStream(new FileInputStream(fileLocation));
+			accountList = (List<Account>) objAccIn.readObject(); 
+			objAccIn.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("IOException: " + e.getMessage());
+		} catch (ClassNotFoundException e) {
+			System.out.println("ClassNotFoundException: " + e.getMessage());
+		}
+		
+		return accountList;
+	}
+
+	
+	
+	public List<Account> getAccountsByUser(User u) {
+		
+		accountList = getAccounts();
+
+		List<Account> userAccounts = new ArrayList<Account>();
+
+		for (Account account : accountList) {
+			if (u.getId().equals(account.getOwnerId())) {
+				return userAccounts;
+			}
+		}
+		
 		return null;
 	}
 
-	public List<Account> getAccountsByUser(User u) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	public Account updateAccount(Account a) {
-		// TODO Auto-generated method stub
-		return null;
+		accountList = getAccounts();
+		
+		for (Account account : accountList) {
+			if (account.getId().equals(a.getId())) {
+				account.setBalance(a.getBalance());
+				account.setType(a.getType());
+				account.setApproved(true);
+				account.setTransactions(a.getTransactions());
+			}
+		}
+		
+		try {
+			objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objAccOut.writeObject(accountList);
+			System.out.println("User Successfully Updated");
+			objAccOut.close();
+			
+			return a;
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("IOException:" + e.getMessage());
+		} 
+		
+		return a;
 	}
 
+	
+	
 	public boolean removeAccount(Account a) {
-		// TODO Auto-generated method stub
+
+		accountList = getAccounts();
+		
+		for (Account account : accountList) {
+			if (account.equals(a)) {
+				accountList.remove(accountList.indexOf(a));
+				
+				try {
+					objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+					objAccOut.writeObject(accountList);
+					System.out.println("Account Successfully Deleted");
+					objAccOut.close();
+					return true;
+
+				} catch (FileNotFoundException e) {
+					System.out.println("File not found");
+					e.printStackTrace();
+				} catch (IOException e) {
+					System.out.println("IOException:" + e.getMessage());
+				} 
+			}
+		}
+		
 		return false;
 	}
-
+	
 }

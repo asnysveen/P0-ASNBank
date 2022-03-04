@@ -3,6 +3,8 @@ package com.revature.beans;
 import java.io.Serializable;
 import java.util.List;
 
+import com.revature.beans.Account.AccountType;
+
 /**
  * Represents a User of the system.
  * Can be a CUSTOMER or EMPLOYEE.
@@ -22,6 +24,23 @@ public class User implements Serializable {
 	private String lastName;
 	private UserType userType;
 	private List<Account> accounts;
+	//add active status
+	
+	public User() {
+		super();
+	}
+
+
+	public User(Integer id, String username, String password, String firstName, String lastName, UserType userType, List<Account> accounts) {
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.userType = userType;
+		this.accounts = accounts;
+	}
+	
 	
 	public Integer getId() {
 		return id;

@@ -12,14 +12,18 @@ public class Transaction implements Serializable {
 	/**Automatically generated universally unique identifier */
 	private static final long serialVersionUID = 4244173215207746743L;
 	
+	
 	public static enum TransactionType {
 		WITHDRAWAL, DEPOSIT, TRANSFER
 	}
+	
+	
 	private Account fromAccountId;
 	private Account toAccountId;
 	private Double amount;
 	private TransactionType type;
 	private LocalDateTime timestamp;
+	
 	
 	public Account getSender() {
 		return fromAccountId;
@@ -27,6 +31,7 @@ public class Transaction implements Serializable {
 	public void setSender(Account sender) {
 		this.fromAccountId = sender;
 	}
+	
 	public Account getRecipient() {
 		return toAccountId;
 	}
@@ -39,6 +44,7 @@ public class Transaction implements Serializable {
 		this.toAccountId = recipient;
 		this.type = TransactionType.TRANSFER;
 	}
+	
 	public Double getAmount() {
 		return amount;
 	}
@@ -48,6 +54,7 @@ public class Transaction implements Serializable {
 		}
 		this.amount = amount;
 	}
+	
 	public TransactionType getType() {
 		return type;
 	}
@@ -58,6 +65,7 @@ public class Transaction implements Serializable {
 		}
 	}
 	
+	
 	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
@@ -67,6 +75,8 @@ public class Transaction implements Serializable {
 	public void setTimestamp() {
 		this.timestamp = LocalDateTime.now();
 	}
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -78,6 +88,8 @@ public class Transaction implements Serializable {
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -111,6 +123,7 @@ public class Transaction implements Serializable {
 			return false;
 		return true;
 	}
+	
 	
 	@Override
 	public String toString() {

@@ -16,6 +16,7 @@ public class Account implements Serializable {
 	public static enum AccountType {
 		CHECKING, SAVINGS
 	}
+	
 	private Integer accountId;
 	private Integer ownerId;
 	private Double balance;
@@ -23,45 +24,70 @@ public class Account implements Serializable {
 	private boolean approved;
 	private List<Transaction> transactions;
 	
+	
+	public Account() {
+		super();
+	}
+	
+	
+	public Account(Integer accountId, Integer ownerId, Double balance, AccountType type, boolean approved,
+			List<Transaction> transactions) {
+		super();
+		this.accountId = accountId;
+		this.ownerId = ownerId;
+		this.balance = balance;
+		this.type = type;
+		this.approved = approved;
+		this.transactions = transactions;
+	}
+
+
 	public Integer getId() {
 		return accountId;
 	}
 	public void setId(Integer id) {
 		this.accountId = id;
 	}
+	
 	public Integer getOwnerId() {
 		return ownerId;
 	}
 	public void setOwnerId(Integer ownerId) {
 		this.ownerId = ownerId;
 	}
+	
 	public Double getBalance() {
 		return balance;
 	}
 	public void setBalance(Double balance) {
 		this.balance = balance;
 	}
+	
 	public AccountType getType() {
 		return type;
 	}
 	public void setType(AccountType type) {
 		this.type = type;
 	}
+	
 	public boolean isApproved() {
 		return approved;
 	}
 	public void setApproved(boolean approved) {
 		this.approved = approved;
 	}
+	
 	public List<Transaction> getTransactions() {
 		return transactions;
 	}
 	public void setTransactions(List<Transaction> transactions) {
 		this.transactions = transactions;
 	}
+	
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	
 	
 	@Override
 	public int hashCode() {
