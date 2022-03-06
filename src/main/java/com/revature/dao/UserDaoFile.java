@@ -1,5 +1,6 @@
 package com.revature.dao;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,7 +20,7 @@ public class UserDaoFile implements UserDao {
 	
 	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Users.txt";
 	
-	public static List<User> userList = new ArrayList<User>();	
+	List<User> userList = new ArrayList<User>();	
 
 	
 	ObjectOutputStream objUserOut;
@@ -27,13 +28,39 @@ public class UserDaoFile implements UserDao {
 //	FileInputStream fileUserIn;
 //	FileOutputStream fileUserOut;
 		
+	public UserDaoFile() {
+		File file = new File(fileLocation);
+		
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+				objUserOut.writeObject(userList);
+				objUserOut.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	
 	public User addUser(User user) {
 		
+//		if (getAllUsers() == null) {
+//			userList.add(user);
+//		} else {
 		userList = getAllUsers();
-
 		userList.add(user);
+//		}
+		
 
 		try {
 			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
@@ -49,9 +76,8 @@ public class UserDaoFile implements UserDao {
 		return user;
 	}
 
-	
 
-		
+	
 	public User getUser(Integer userId) {
 				
 		userList = getAllUsers();
@@ -103,17 +129,27 @@ public class UserDaoFile implements UserDao {
 	
 	
 	public User updateUser(User u) {
-		// TODO Auto-generated method stub
+
 		userList = getAllUsers();
+		
+		int index = 0;
 		
 		for (User user : userList) {
 			if (user.getId().equals(u.getId())) {
-				user.setUsername(u.getUsername());
-				user.setPassword(u.getPassword());
-				user.setFirstName(u.getFirstName());
-				user.setLastName(u.getLastName());
+				break;
 			}
+			index++;
 		}
+		userList.set(index, u);
+
+//		for (User user : userList) {
+//			if (user.getId().equals(u.getId())) {
+//				user.setUsername(u.getUsername());
+//				user.setPassword(u.getPassword());
+//				user.setFirstName(u.getFirstName());
+//				user.setLastName(u.getLastName());
+//				user.setUserType(u.getUserType());
+//				user.setAccounts(u.getAccounts());
 
 		try {
 			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
@@ -136,27 +172,34 @@ public class UserDaoFile implements UserDao {
 		
 		userList = getAllUsers();
 		
+		int index = 0;
+
 		for (User user : userList) {
-			if (user.equals(u)) {
-				userList.remove(userList.indexOf(u));
-				
-				try {
-					objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
-					objUserOut.writeObject(userList);
-					System.out.println("User Successfully Deleted");
-					objUserOut.close();
-				} catch (FileNotFoundException e) {
-					System.out.println("File not found");
-					e.printStackTrace();
-				} catch (IOException e) {
-					System.out.println("IOException:" + e.getMessage());
-				} 
-				
-				return true;
+			if (user.getId().equals(u.getId())) {
+				break;
 			}
+			index++;
 		}
+		userList.remove(index);
+				
+		try {
+			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objUserOut.writeObject(userList);
+			System.out.println("User Successfully Deleted");
+			objUserOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("IOException:" + e.getMessage());
+		} 
 			
-		return false;
+		if(userList.contains(u)) {
+            return false;
+        }else {
+            return true;
+        }
+			
 	}
 
 }

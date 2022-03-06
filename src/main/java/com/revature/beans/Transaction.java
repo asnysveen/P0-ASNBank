@@ -25,6 +25,11 @@ public class Transaction implements Serializable {
 	private LocalDateTime timestamp;
 	
 	
+	public Transaction() {
+		super();
+	}
+	
+	
 	public Account getSender() {
 		return fromAccountId;
 	}

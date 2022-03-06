@@ -1,5 +1,9 @@
 package com.revature.services;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +12,7 @@ import com.revature.beans.Transaction;
 import com.revature.beans.Transaction.TransactionType;
 import com.revature.beans.User;
 import com.revature.dao.AccountDao;
+import com.revature.dao.TransactionDaoFile;
 import com.revature.exceptions.OverdraftException;
 import com.revature.exceptions.UnauthorizedException;
 import com.revature.utils.SessionCache;
@@ -15,11 +20,20 @@ import com.revature.utils.SessionCache;
 /**
  * This class should contain the business logic for performing operations on Accounts
  */
+
 public class AccountService {
 	
 	public AccountDao actDao;
+	public TransactionDaoFile tdao = new TransactionDaoFile();
 	public static final double STARTING_BALANCE = 25d;
 	
+	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Transactions.txt";
+	ObjectOutputStream objTranOut;
+	
+	List<Transaction> userTranList = new ArrayList<Transaction>();
+	List<Account> accountList = new ArrayList<Account>();
+	List<Transaction> allTranList = new ArrayList<Transaction>();
+
 	
 	public AccountService(AccountDao dao) {
 		this.actDao = dao;
@@ -34,10 +48,13 @@ public class AccountService {
 	 */
 	public void withdraw(Account a, Double amount) {
 		
-		List<Transaction> transactionList = new ArrayList<Transaction>();
 		Transaction transaction = new Transaction();
-
-		if (a.getBalance() < amount) {
+		userTranList = new ArrayList<Transaction>();
+		
+		
+		if (!a.isApproved()) {
+			throw new UnsupportedOperationException();
+		} else if (a.getBalance() < amount) {
 			throw new OverdraftException();
 		} else if (amount < 0) {
 			throw new UnsupportedOperationException();
@@ -51,12 +68,29 @@ public class AccountService {
 		transaction.setType(TransactionType.WITHDRAWAL);
 		transaction.setTimestamp();
 		
-		transactionList = a.getTransactions();
-		transactionList.add(transaction);
-		a.setTransactions(transactionList);
+		if (a.getTransactions() == null) {
+			userTranList.add(transaction);
+		} else {
+			userTranList = a.getTransactions();
+			userTranList.add(transaction);
+		}
+		a.setTransactions(userTranList);
 		
 		actDao.updateAccount(a);
 		
+		
+		allTranList = tdao.getAllTransactions();
+		allTranList.add(transaction);
+		
+		try {
+			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objTranOut.writeObject(allTranList);
+			objTranOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("IOException: " + e.getMessage());
+		}
 	}
 	
 	
@@ -67,10 +101,12 @@ public class AccountService {
 	 */
 	public void deposit(Account a, Double amount) {
 		
-		List<Transaction> transactionList = new ArrayList<Transaction>();
 		Transaction transaction = new Transaction();
+		userTranList = new ArrayList<Transaction>();
 
-		if (amount < 0) {
+		if (!a.isApproved()) {
+			throw new UnsupportedOperationException();
+		} else if (amount < 0) {
 			throw new UnsupportedOperationException();
 		} else {
 			a.setBalance(a.getBalance() + amount);
@@ -82,12 +118,29 @@ public class AccountService {
 		transaction.setType(TransactionType.DEPOSIT);
 		transaction.setTimestamp();
 		
-		transactionList = a.getTransactions();
-		transactionList.add(transaction);
-		a.setTransactions(transactionList);
+		if (a.getTransactions() == null) {
+			userTranList.add(transaction);
+		} else {
+			userTranList = a.getTransactions();
+			userTranList.add(transaction);
+		}
+		a.setTransactions(userTranList);
 		
 		actDao.updateAccount(a);
 
+		
+		allTranList = tdao.getAllTransactions();
+		allTranList.add(transaction);
+		
+		try {
+			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objTranOut.writeObject(allTranList);
+			objTranOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("IOException: " + e.getMessage());
+		}
 	}
 	
 	
@@ -103,10 +156,12 @@ public class AccountService {
 	 */
 	public void transfer(Account fromAct, Account toAct, double amount) {
 		
-		List<Transaction> transactionList = new ArrayList<Transaction>();
 		Transaction transaction = new Transaction();
-
-		if (amount < 0) {
+		userTranList = new ArrayList<Transaction>();
+		
+		if (amount > fromAct.getBalance()) {
+			throw new UnsupportedOperationException();
+		} else if (amount < 0) {
 			throw new UnsupportedOperationException();
 		} else if (!fromAct.isApproved() && !toAct.isApproved()) {
 			throw new UnsupportedOperationException();
@@ -115,23 +170,46 @@ public class AccountService {
 			toAct.setBalance(toAct.getBalance() + amount);
 		}
 
+
 		transaction.setSender(fromAct);
 		transaction.setRecipient(toAct);
 		transaction.setAmount(amount);
-		transaction.setType(TransactionType.TRANSFER);
+		transaction.setType(Transaction.TransactionType.TRANSFER);
 		transaction.setTimestamp();
 		
-		transactionList = fromAct.getTransactions();
-		transactionList.add(transaction);
-		fromAct.setTransactions(transactionList);
 		
-		actDao.updateAccount(fromAct);
+		if (toAct.getTransactions() == null) {
+			userTranList.add(transaction);
+		} else {
+			userTranList = toAct.getTransactions();
+			userTranList.add(transaction);
+		}
+		toAct.setTransactions(userTranList);
 		
-		transactionList = toAct.getTransactions();
-		transactionList.add(transaction);
-		toAct.setTransactions(transactionList);
-		
+		if (fromAct.getTransactions() == null) {
+			userTranList.add(transaction);
+		} else {
+			userTranList = fromAct.getTransactions();
+			userTranList.add(transaction);
+		}
+		fromAct.setTransactions(userTranList);
+
 		actDao.updateAccount(toAct);
+		actDao.updateAccount(fromAct);
+
+		
+		allTranList = tdao.getAllTransactions();
+		allTranList.add(transaction);
+		
+		try {
+			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objTranOut.writeObject(allTranList);
+			objTranOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			System.out.println("IOException: " + e.getMessage());
+		}
 	}
 	
 	
@@ -141,17 +219,24 @@ public class AccountService {
 	 * @return the Account object that was created
 	 */
 	public Account createNewAccount(User u) {
-		
-		//List<Account> userAccounts = actDao.getAccountsByUser(u);
-		
+				
 		Account newAccount = new Account();
 		
-		//newAccount.setId();
 		newAccount.setOwnerId(u.getId());
 		newAccount.setBalance(STARTING_BALANCE);
 		newAccount.setType(Account.AccountType.CHECKING);
-		newAccount.setApproved(true);
+		newAccount.setApproved(false);
 		newAccount.setTransactions(null);
+		newAccount.setId(newAccount.hashCode());
+
+		
+		if (actDao.getAccountsByUser(u) == null) {
+			accountList.add(newAccount);
+		} else {
+			accountList = actDao.getAccountsByUser(u);
+			accountList.add(newAccount);
+		}
+		u.setAccounts(accountList);
 		
 		actDao.addAccount(newAccount);
 		

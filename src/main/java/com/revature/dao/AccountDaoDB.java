@@ -29,7 +29,7 @@ public class AccountDaoDB implements AccountDao {
 	
 	public Account addAccount(Account a) {
 
-		String query = "insert into account (owner_id, balance, account_type, approved) values (?, ?, ?, ?)";
+		String query = "insert into p0_account (owner_id, balance, account_type, approved) values (?, ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(query);
 			pstmt.setInt(1, a.getOwnerId());
@@ -39,7 +39,6 @@ public class AccountDaoDB implements AccountDao {
 			pstmt.executeUpdate();			
 				
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
@@ -50,7 +49,7 @@ public class AccountDaoDB implements AccountDao {
 	
 	public Account getAccount(Integer actId) {
 		
-		String query = "select * from account where id = " + actId.intValue();
+		String query = "select * from p0_account where id = " + actId.intValue();
 		Account a = new Account();
 		
 		try {
@@ -64,7 +63,6 @@ public class AccountDaoDB implements AccountDao {
 				a.setType((AccountType)rs.getObject("account_type"));
 				a.setApproved(rs.getBoolean("approved"));
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
@@ -73,7 +71,7 @@ public class AccountDaoDB implements AccountDao {
 
 	public List<Account> getAccounts() {
 
-		String query = "select * from account";
+		String query = "select * from p0_account";
 		List<Account> accountList = new ArrayList<Account>();
 		
 		try {
@@ -91,16 +89,17 @@ public class AccountDaoDB implements AccountDao {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
 		return accountList;
 	}
 
+	
+	
 	public List<Account> getAccountsByUser(User u) {
 
-		String query = "select * from account where owner_id = " + u.getId();
+		String query = "select * from p0_account where owner_id = " + u.getId();
 		List<Account> accountList = new ArrayList<Account>();
 		
 		try {
@@ -118,7 +117,6 @@ public class AccountDaoDB implements AccountDao {
 			}
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	
@@ -127,17 +125,36 @@ public class AccountDaoDB implements AccountDao {
 
 	public Account updateAccount(Account a) {
 
+		String query = "update p0_account set owner_id = ?, balance = ?, account_type = ?, approved = ? where account_id = ?";
 		
-		return null;
+		try {
+			pstmt = conn.prepareStatement(query);
+			pstmt.setInt(1, a.getOwnerId());		
+			pstmt.setDouble(2, a.getBalance());		
+			pstmt.setObject(3, a.getType());		
+			pstmt.setBoolean(4, a.isApproved());		
+			pstmt.setInt(5, a.getId());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return a;
 	}
 
 	public boolean removeAccount(Account a) {
 
-		String query = "delete * from account where id = " + a.getId();
+		String query = "delete * from p0_account where id = " + a.getId();
+		boolean status = false;
 		
-		stmt = conn.
+		try {
+			stmt = conn.createStatement();
+			status = stmt.execute(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
-		return false;
+		return status;
 	}
 
 }

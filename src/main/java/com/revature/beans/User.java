@@ -3,7 +3,6 @@ package com.revature.beans;
 import java.io.Serializable;
 import java.util.List;
 
-import com.revature.beans.Account.AccountType;
 
 /**
  * Represents a User of the system.

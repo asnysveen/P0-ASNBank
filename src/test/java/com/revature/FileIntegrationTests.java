@@ -41,11 +41,12 @@ public class FileIntegrationTests extends PointWatcher {
 	
 	@BeforeClass
 	public static void setupFileLocations() {
-		UserDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Users.txt";
-		AccountDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
+//		UserDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Users.txt";
+//		AccountDaoFile.fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
 	
-//		UserDaoFile.fileLocation = "target/integrationTests/users";
-//		AccountDaoFile.fileLocation = "target/integrationTests/accounts";
+		UserDaoFile.fileLocation = "target/integrationTests/users";
+		AccountDaoFile.fileLocation = "target/integrationTests/accounts";
+		TransactionDaoFile.fileLocation = "target/integrationTests/transactions";
 	}
 	
 	/*
@@ -73,6 +74,9 @@ public class FileIntegrationTests extends PointWatcher {
 	@After
 	public void tearDown() throws IOException {
 		Files.delete(Paths.get(AccountDaoFile.fileLocation));
+		Files.delete(Paths.get(UserDaoFile.fileLocation));
+		Files.delete(Paths.get(TransactionDaoFile.fileLocation));
+
 	}
 	
 	@Test
@@ -201,6 +205,6 @@ public class FileIntegrationTests extends PointWatcher {
 		testAct.setTransactions(Arrays.asList(t));
 		adao.updateAccount(testAct);
 		List<Transaction> list = tdao.getAllTransactions();
-		assertEquals(list.size(), 0);
+		assertEquals(list.size(), 1);
 	}
 }

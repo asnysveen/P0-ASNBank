@@ -1,7 +1,6 @@
 package com.revature.dao;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,7 +17,6 @@ public class TransactionDaoDB implements TransactionDao {
 	
 	private static Connection conn;
 	private static Statement stmt;
-	private static PreparedStatement pstmt;
 	private static ResultSet rs;
 	
 	public TransactionDaoDB() {
@@ -28,7 +26,7 @@ public class TransactionDaoDB implements TransactionDao {
 	public List<Transaction> getAllTransactions() {
 
 		List<Transaction> transactionList = new ArrayList<Transaction>();
-		String query = "select * from transaction";
+		String query = "select * from p0_transaction";
 		
 		try {
 			stmt = conn.createStatement();

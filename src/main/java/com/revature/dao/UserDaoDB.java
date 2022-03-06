@@ -22,12 +22,15 @@ public class UserDaoDB implements UserDao {
 	private static PreparedStatement pstmt;
 	private static ResultSet rs;
 	
+	
 	public UserDaoDB() {
 		conn = ConnectionUtil.getConnection();
 	}
 	
+	
+	
 	public User addUser(User user) {
-		// TODO Auto-generated method stub
+
 		String query = "insert into p0_user (first_name, last_name, username, password, user_type) values (?, ?, ?, ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(query);
@@ -39,13 +42,14 @@ public class UserDaoDB implements UserDao {
 			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return user;
 	}
 
+	
+	
 	public User getUser(Integer userId) {
 
 		String query = "select * from p0_user where id = " + userId.intValue();
@@ -65,13 +69,14 @@ public class UserDaoDB implements UserDao {
 			}
 				
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return user;
 	}
 
+	
+	
 	public User getUser(String username, String pass) {
 
 		String query = "select * from p0_user where username = ? and password = ?";
@@ -93,15 +98,16 @@ public class UserDaoDB implements UserDao {
 			}
 				
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return null;
 	}
 
+	
+	
 	public List<User> getAllUsers() {
-		// TODO Auto-generated method stub
+
 		String query = "select * from p0_user";
 		List<User> userList = new ArrayList<User>();
 
@@ -119,16 +125,18 @@ public class UserDaoDB implements UserDao {
 				u.setUserType((UserType)rs.getObject("user_type"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return userList;
 	}
 
+	
+	
 	public User updateUser(User u) {
-		// TODO Auto-generated method stub
+
 		String query = "update p0_user set first_name = ?, last_name = ?, username = ?, password = ?, user_type = ? where id = ?";
+		
 		try {
 			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, u.getFirstName());		
@@ -140,14 +148,15 @@ public class UserDaoDB implements UserDao {
 			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return u;
 	}
 
+	
+	
 	public boolean removeUser(User u) {
-		// TODO A)uto-generated method stub
 		
 		String query = "delete from p0_user where id = " + u.getId();
 		boolean status = false;
@@ -156,7 +165,6 @@ public class UserDaoDB implements UserDao {
 			stmt = conn.createStatement();
 			status = stmt.execute(query);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return status;

@@ -5,6 +5,7 @@ import com.revature.dao.AccountDao;
 import com.revature.dao.UserDao;
 import com.revature.exceptions.InvalidCredentialsException;
 import com.revature.exceptions.UsernameAlreadyExistsException;
+import com.revature.utils.SessionCache;
 
 /**
  * This class should contain the business logic for performing operations on users
@@ -39,6 +40,7 @@ public class UserService {
 				throw new InvalidCredentialsException();
 		} else {
 			System.out.println("Login Successful");
+			SessionCache.setCurrentUser(look4User);
 			return look4User;
 		}
 				
@@ -59,6 +61,7 @@ public class UserService {
 				System.out.println("Username Already Exists");
 				throw new UsernameAlreadyExistsException();
 			} else {
+				newUser.setId(newUser.hashCode());
 				userDao.addUser(newUser);
 				System.out.println("User Successfully Added");
 			}

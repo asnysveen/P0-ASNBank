@@ -2,15 +2,18 @@ package com.revature.driver;
 
 import java.util.Scanner;
 
-import com.revature.beans.Account;
-import com.revature.beans.Account.AccountType;
 import com.revature.beans.User;
 import com.revature.beans.User.UserType;
 import com.revature.dao.AccountDao;
 import com.revature.dao.AccountDaoFile;
+import com.revature.dao.TransactionDao;
+import com.revature.dao.TransactionDaoFile;
 import com.revature.dao.UserDao;
 import com.revature.dao.UserDaoFile;
+import com.revature.exceptions.InvalidCredentialsException;
+import com.revature.services.AccountService;
 import com.revature.services.UserService;
+import com.revature.utils.SessionCache;
 
 /**
  * This is the entry point to the application
@@ -19,12 +22,15 @@ public class BankApplicationDriver {
 
 	public static void main(String[] args) {
 		
-		UserDao udao = new UserDaoFile();
+//		UserDao udao = new UserDaoDB();
+//		AccountDao adao = new AccountDaoDB();
 		
-		//AccountDao adao = new AccountDaoDB();
-
+		UserDao udao = new UserDaoFile();
 		AccountDao adao = new AccountDaoFile();
+		TransactionDao tdao = new TransactionDaoFile();
+		
 		UserService us = new UserService(udao, adao);
+		AccountService as = new AccountService(adao);
 		
 		Scanner scan = new Scanner(System.in);
 		
@@ -39,20 +45,13 @@ public class BankApplicationDriver {
 		//Sign In / Register Menu
 		//put 1500ms timer here
 		do {
-			System.out.println("Enter the number of your desired baning option: ");
 			System.out.println("1. Sign In");
 			System.out.println("2. Register as a new User");
-
-//			System.out.println("3. Retrieve an Account");
-//			System.out.println("4. Update an Account");
-//			System.out.println("5. Delete an Account");
-//			System.out.println("6. Retrieve All Accounts");
-//			System.out.println("0. Exit");
+			System.out.print("Enter the number of your desired baning option [1-2]: ");
 
 			s1 = scan.nextInt();
 
 
-			
 			switch (s1) {
 				case 1:
 					//Logging In
@@ -69,51 +68,18 @@ public class BankApplicationDriver {
 							System.out.println("Customer Menu:");
 							System.out.println("1. Create an Account");
 							System.out.println("2. Retrieve Accounts");
-							System.out.println("3. Update an Account");
-							System.out.println("4. Delete an Account");
-							System.out.println("5. Retrieve User Profile");
-							System.out.println("6. Update User Profile");
-							System.out.println("7. Delete User Profile");
+							System.out.println("3. Make a Withdraw");
+							System.out.println("4. Make a Deposit");
+							System.out.println("5. Make a Transfer");
 							System.out.println("0. Exit");
-							System.out.print("Enter the number of your desired banking option: ");
+							System.out.print("Enter the number of your desired banking option [0-5]: ");
 	
 							s1 = scan.nextInt();
 	
 							switch (s1) {
 								case 1:
 									//Creating Account
-									// TODO automate accountID
-
-									int id;
-									
-									int oi = udao.getUser(use, pass).getId();
-									
-									AccountType at = null;
-									System.out.println("1. Checking");
-									System.out.println("2. Savings");
-									System.out.print("Choose the number of your desired account type:");
-									int in1 = scan.nextInt();
-									
-									while (in1 != 1 && in1 != 2) {
-										System.out.print("Choose the number of your desired account type:");
-										in1 = scan.nextInt();
-									}
-									
-									switch (in1) {
-										case 1:
-											at = AccountType.CHECKING;
-											break;
-											
-										case 2:
-											at = AccountType.SAVINGS;
-											break;
-									}
-									//TODO set starting balance
-									System.out.print("Enter your Starting Balance (format: 0.00): ");
-									Double ab = scan.nextDouble();
-									
-									adao.addAccount(new Account(id, oi, ab, at, true, null));
-									
+									as.createNewAccount(udao.getUser(use, pass));
 									break;
 									
 								case 2:
@@ -123,48 +89,43 @@ public class BankApplicationDriver {
 									break;
 									
 								case 3:
-									//Update Account
+									//Withdraw
+									System.out.print("Enter your account number:");
+									s1 = scan.nextInt();
+									System.out.print("Enter the amount you wish to withdraw [format 0.00]: ");
+									double with = scan.nextDouble();
 									
+									as.withdraw(adao.getAccount(s1), with);
+									
+									System.out.println("$" + with + " has been withdrawn from account " + s1);
 									break;
 									
 								case 4:
-									//Delete Account
-									//how to retrieve specific account by user
+									//Deposit
+									System.out.print("Enter your account number:");
+									s1 = scan.nextInt();
+									System.out.print("Enter the amount you wish to deposit [format 0.00]: ");
+									double depo = scan.nextDouble();
 									
+									as.withdraw(adao.getAccount(s1), depo);
+									
+									System.out.println("$" + depo + " has been deposited from account " + s1);
 									break;
 									
 								case 5:
-									//Retrieve User Information
-									System.out.println("Here is your User information");
-									System.out.println(udao.getUser(use, pass));
-	
+									//Transfer
+									System.out.print("Enter account number to transfer from: ");
+									int from = scan.nextInt();
+									System.out.print("Enter account number to transfer to: ");
+									int to = scan.nextInt();
+									System.out.print("Enter the amount you wish to transfer [format 0.00]: ");
+									double tran = scan.nextDouble();
+									
+									as.transfer(adao.getAccount(from), adao.getAccount(to), tran);
 									break;
 									
-								case 6:
-									//Update User Information
-									
-									udao.updateUser(null);
-									break;
-									
-								case 7:
-									//Delete User
-									System.out.println("1. Yes");
-									System.out.println("2. No");
-									System.out.print("Are you sure you would like to delete this user profile?: ");
-									
-									s1 = scan.nextInt();
-									
-									switch (s1) {
-									case 1:
-										udao.removeUser(udao.getUser(use, pass));
-										break;
-										
-									case 2:
-										break;
-									}
-									
-									break;
 							}
+							
 						} while (s1 != 0);
 						
 					//Employee Menu
@@ -172,18 +133,38 @@ public class BankApplicationDriver {
 							System.out.println("Employee Menu:");
 							System.out.println("1. Approve or Reject Account");
 							System.out.println("2. View Log of Transactions");
-							System.out.println("0. Exit");
-							System.out.print("Enter the number of your desired baning option: ");
+							System.out.println("0. Go Back");
+							System.out.print("Enter the number of your desired baning option [0-2]: ");
 							
 							s1 = scan.nextInt();
 							
 							switch (s1) {
 								case 1:
 									//Approve / Reject Accounts
+									boolean approval = false;
+									
+									System.out.print("Enter account number alter approval of: ");
+									int actNo = scan.nextInt();
+									
+									System.out.println("Would you like to 1) Approve or 2) Reject this account [1-2]: ");
+									s1 = scan.nextInt();
+									
+									switch (s1) {
+										case 1:
+											approval = true;
+											break;
+										case 2:
+											approval = false;
+											break;
+											
+									}
+									as.approveOrRejectAccount(adao.getAccount(actNo), approval);
+
 									break;
 									
 								case 2:
 									//View Transaction Log
+									System.out.println(tdao.getAllTransactions());
 									break;
 							}
 					}
@@ -192,16 +173,7 @@ public class BankApplicationDriver {
 				
 				//Register New User
 				case 2:
-					int id = UserDaoFile.userList.size() + 1;
-					
-					User look4UserID = udao.getUser(id);
-					
-					while (!look4UserID.equals(null)) {
-						id++;
-					}
-//					while (id == udao.getUser(id).getId()) {
-//						id++;
-//					}
+					int id = 0;
 					
 					System.out.print("Enter a Username: ");
 					String un = scan.next();
@@ -216,14 +188,12 @@ public class BankApplicationDriver {
 					String ln = scan.next();
 					
 					UserType ut = null;
-					System.out.print("Are you an 'Employee' or a 'Customer': "); 
-					String in1 = scan.next().toLowerCase();
-					while (!in1.equals("employee") && !in1.equals("customer")) {
-						System.out.print("Are you an 'Employee' or a 'Customer': "); 
-						in1 = scan.next().toLowerCase();
-					}
-					switch (in1) {
-						case "employee":
+					
+					System.out.print("Are you an 1) Employee or a 2) Customer [1-2]: "); 
+					s1 = scan.nextInt();
+					
+					switch (s1) {
+						case 1:
 							System.out.print("Enter administrative Username: ");
 							String adUser = scan.next().toLowerCase();
 							System.out.print("Enter administrative Password: ");
@@ -233,81 +203,24 @@ public class BankApplicationDriver {
 								ut = UserType.EMPLOYEE;
 							} else {
 								ut = UserType.CUSTOMER;
+								System.out.println("Invalid Admin Credentials");
+								throw new InvalidCredentialsException();
 							}
 							break;
 							
-						case "customer":
+						case 2:
 							ut = UserType.CUSTOMER;
 							break;
 					}
 					
 					us.register(new User(id, un, pw, fn, ln, ut, null));;
-					//us.register(new User());
+
 					break;
-					
-//				case 3:
-//				System.out.print("Would you like to retrieve the account with 1) 'User Id' or 2) 'Username' & 'Password': ");
-//				s1 = scan.nextInt();
-//				
-//				switch (s1) {
-//					case 1:
-//						System.out.print("Enter the UserID of the account to retrieve: ");
-//						s1 = scan.nextInt();
-//						
-//						System.out.println(udao.getUser(s1));
-//						break;
-//					case 2:
-//						System.out.print("Enter Username: ");
-//						use = scan.next();
-//						System.out.print("Enter Password: ");
-//						pass = scan.next();
-//						
-//						System.out.println(udao.getUser(use, pass));
-//				}
-//					
-//				case 4:
-//					break;
-//				
-//				case 5:
-//					System.out.print("Enter User ID of the account to Delete: ");
-//					s1 = scan.nextInt();
-//
-//					udao.removeUser(udao.getUser(s1));
-//					break;
-//				
-//				case 6:
-//					System.out.println(udao.getAllUsers());
-//					break;
-					
-					
-
-					
-//					List<AccountType> ac = null;
-//					System.out.print("What type of account do you require: 'Checking', 'Savings' or 'Both': ");
-//					String in2 = scan.next().toLowerCase();
-//					while (!in2.equals("checking") && !in2.equals("savings") && !in2.equals("both")) {
-//						System.out.print("What type of account would you like to open: 'Checking', 'Savings' or 'Both': ");
-//						in2 = scan.next().toLowerCase();
-//					}	
-//					switch (in2) {
-//						case "checking":
-//							ac = Arrays.asList(AccountType.CHECKING);
-//							break;
-//						case "savings":
-//							ac = Arrays.asList(AccountType.SAVINGS);
-//							break;
-//						case "both":
-//							ac = Arrays.asList(AccountType.CHECKING, AccountType.SAVINGS);
-//							break;
-//					}
-					
-					
-				
-
 				
 			}
+			
 		} while (s1 != 0);
-//		
+		
 		System.out.println("Thank you for choosing ASN Bank, goodbye.");
 		
 		scan.close();

@@ -1,9 +1,12 @@
 package com.revature.dao;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +16,36 @@ public class TransactionDaoFile implements TransactionDao {
 	
 	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Transactions.txt";
 
-	public static List<Transaction> transactionList = new ArrayList<Transaction>();	
+	List<Transaction> transactionList = new ArrayList<Transaction>();	
 
-	
+	ObjectOutputStream objTranOut;
 	ObjectInputStream objTranIn;
 
 	
-	
+	public TransactionDaoFile() {
+		File file = new File(fileLocation);
+			
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+				objTranOut.writeObject(transactionList);
+				objTranOut.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+
 	@SuppressWarnings("unchecked")
 	public List<Transaction> getAllTransactions() {
 
@@ -34,7 +60,7 @@ public class TransactionDaoFile implements TransactionDao {
 		} catch (ClassNotFoundException e) {
 			System.out.println("ClassNotFoundException: " + e.getMessage());
 		}
-		return null;
+		return transactionList;
 	}
 
 }

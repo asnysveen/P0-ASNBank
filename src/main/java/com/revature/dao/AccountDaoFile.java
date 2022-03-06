@@ -1,5 +1,6 @@
 package com.revature.dao;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,7 +21,7 @@ public class AccountDaoFile implements AccountDao {
 
 	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
 	
-	public static List<Account> accountList = new ArrayList<Account>();
+	List<Account> accountList = new ArrayList<Account>();
 	
 	
 	ObjectOutputStream objAccOut;
@@ -28,6 +29,30 @@ public class AccountDaoFile implements AccountDao {
 	
 	
 	
+	public AccountDaoFile() {
+		File file = new File(fileLocation);
+		
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+				objAccOut.writeObject(accountList);
+				objAccOut.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+
 	//create account based on user account: e.g., (userId + "-1") for checking or (userId + "-2") for savings
 	public Account addAccount(Account a) {
 		
@@ -38,12 +63,11 @@ public class AccountDaoFile implements AccountDao {
 		try {
 			objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 			objAccOut.writeObject(accountList);
-			System.out.println("Account Successfully Registered");
 			objAccOut.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found" + e.getMessage());
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException:" + e.getMessage());
+			e.printStackTrace();
 		} 
 
 		return a;
@@ -74,11 +98,11 @@ public class AccountDaoFile implements AccountDao {
 			accountList = (List<Account>) objAccIn.readObject(); 
 			objAccIn.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
+			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			System.out.println("ClassNotFoundException: " + e.getMessage());
+			e.printStackTrace();
 		}
 		
 		return accountList;
@@ -110,7 +134,7 @@ public class AccountDaoFile implements AccountDao {
 			if (account.getId().equals(a.getId())) {
 				account.setBalance(a.getBalance());
 				account.setType(a.getType());
-				account.setApproved(true);
+				account.setApproved(a.isApproved());
 				account.setTransactions(a.getTransactions());
 			}
 		}
@@ -118,15 +142,12 @@ public class AccountDaoFile implements AccountDao {
 		try {
 			objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 			objAccOut.writeObject(accountList);
-			System.out.println("User Successfully Updated");
 			objAccOut.close();
-			
 			return a;
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException:" + e.getMessage());
+			e.printStackTrace();
 		} 
 		
 		return a;
