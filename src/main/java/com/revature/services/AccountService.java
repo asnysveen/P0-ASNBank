@@ -1,8 +1,5 @@
 package com.revature.services;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +9,33 @@ import com.revature.beans.Transaction;
 import com.revature.beans.Transaction.TransactionType;
 import com.revature.beans.User;
 import com.revature.dao.AccountDao;
-import com.revature.dao.TransactionDaoFile;
+import com.revature.dao.AccountDaoDB;
+import com.revature.dao.TransactionDaoDB;
 import com.revature.exceptions.OverdraftException;
 import com.revature.exceptions.UnauthorizedException;
 import com.revature.utils.SessionCache;
+
+//Required for File implementation
+import com.revature.dao.AccountDaoFile;
+import com.revature.dao.TransactionDaoFile;
 
 /**
  * This class should contain the business logic for performing operations on Accounts
  */
 
+@SuppressWarnings("unused")
 public class AccountService {
 	
 	public AccountDao actDao;
-	public TransactionDaoFile tdao = new TransactionDaoFile();
+	
+	//For File implementation
+//	public AccountDaoFile adao = new AccountDaoFile();
+//	public TransactionDaoFile tdao = new TransactionDaoFile();
+	
+	//For DB implementation
+	public AccountDaoDB adao = new AccountDaoDB();
+	public TransactionDaoDB tdao = new TransactionDaoDB();
+	
 	public static final double STARTING_BALANCE = 25d;
 	
 	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Transactions.txt";
@@ -53,13 +64,17 @@ public class AccountService {
 		
 		
 		if (!a.isApproved()) {
+			System.out.println("\n~~~~~ Account is not approved for transactions ~~~~~");
 			throw new UnsupportedOperationException();
 		} else if (a.getBalance() < amount) {
+			System.out.println("\n~~~~~~~~~ Insufficient funds in account ~~~~~~~~~");
 			throw new OverdraftException();
 		} else if (amount < 0) {
+			System.out.println("\n~~~~~~~ Unable to deposit a negative amount ~~~~~~~");
 			throw new UnsupportedOperationException();
 		} else {
 			a.setBalance(a.getBalance() - amount);
+			System.out.println("\n<^><^> $" + amount + " Successfully Withdrawn from Account " + a.getId() + " <^><^>");
 		}
 
 		transaction.setSender(a);
@@ -68,29 +83,19 @@ public class AccountService {
 		transaction.setType(TransactionType.WITHDRAWAL);
 		transaction.setTimestamp();
 		
+		tdao.updateTransactions(transaction);
+		
 		if (a.getTransactions() == null) {
 			userTranList.add(transaction);
 		} else {
 			userTranList = a.getTransactions();
 			userTranList.add(transaction);
 		}
-		a.setTransactions(userTranList);
 		
+		a.setTransactions(userTranList);
+
 		actDao.updateAccount(a);
 		
-		
-		allTranList = tdao.getAllTransactions();
-		allTranList.add(transaction);
-		
-		try {
-			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
-			objTranOut.writeObject(allTranList);
-			objTranOut.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
-		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
-		}
 	}
 	
 	
@@ -105,11 +110,14 @@ public class AccountService {
 		userTranList = new ArrayList<Transaction>();
 
 		if (!a.isApproved()) {
+			System.out.println("\n~~~~~~~ Account is not approved for transactions ~~~~~~~");
 			throw new UnsupportedOperationException();
 		} else if (amount < 0) {
+			System.out.println("\n~~~~~~~~~ Unable to deposit a negative amount ~~~~~~~~~");
 			throw new UnsupportedOperationException();
 		} else {
 			a.setBalance(a.getBalance() + amount);
+			System.out.println("\n<^><^> $" + amount + " Successfully Deposited into Account " + a.getId() + " <^><^>");
 		}
 
 		transaction.setSender(a);
@@ -118,29 +126,19 @@ public class AccountService {
 		transaction.setType(TransactionType.DEPOSIT);
 		transaction.setTimestamp();
 		
+		tdao.updateTransactions(transaction);
+		
 		if (a.getTransactions() == null) {
 			userTranList.add(transaction);
 		} else {
 			userTranList = a.getTransactions();
 			userTranList.add(transaction);
 		}
+		
 		a.setTransactions(userTranList);
 		
 		actDao.updateAccount(a);
 
-		
-		allTranList = tdao.getAllTransactions();
-		allTranList.add(transaction);
-		
-		try {
-			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
-			objTranOut.writeObject(allTranList);
-			objTranOut.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
-		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
-		}
 	}
 	
 	
@@ -160,14 +158,19 @@ public class AccountService {
 		userTranList = new ArrayList<Transaction>();
 		
 		if (amount > fromAct.getBalance()) {
+			System.out.println("\n~~~~ Insufficient funds in transferring account ~~~~");
 			throw new UnsupportedOperationException();
 		} else if (amount < 0) {
+			System.out.println("\n~~~~~~ Cannot transfer a negative amount ~~~~~~");
 			throw new UnsupportedOperationException();
 		} else if (!fromAct.isApproved() && !toAct.isApproved()) {
+			System.out.println("\n~ At least one account involved is not approved for transactions ~");
 			throw new UnsupportedOperationException();
 		} else {
 			fromAct.setBalance(fromAct.getBalance() - amount);
 			toAct.setBalance(toAct.getBalance() + amount);
+			System.out.println("\n<^> $" + amount + " Successfully transferred from Account " + fromAct.getId() + " to Account " + toAct.getId() + " <^>");
+
 		}
 
 
@@ -177,6 +180,7 @@ public class AccountService {
 		transaction.setType(Transaction.TransactionType.TRANSFER);
 		transaction.setTimestamp();
 		
+		tdao.updateTransactions(transaction);
 		
 		if (toAct.getTransactions() == null) {
 			userTranList.add(transaction);
@@ -197,19 +201,6 @@ public class AccountService {
 		actDao.updateAccount(toAct);
 		actDao.updateAccount(fromAct);
 
-		
-		allTranList = tdao.getAllTransactions();
-		allTranList.add(transaction);
-		
-		try {
-			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
-			objTranOut.writeObject(allTranList);
-			objTranOut.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
-		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
-		}
 	}
 	
 	
@@ -224,10 +215,16 @@ public class AccountService {
 		
 		newAccount.setOwnerId(u.getId());
 		newAccount.setBalance(STARTING_BALANCE);
-		newAccount.setType(Account.AccountType.CHECKING);
+		if (adao.getAccountsByUser(u) == null) {
+			newAccount.setType(Account.AccountType.CHECKING);
+		} else {
+			newAccount.setType(Account.AccountType.SAVINGS);
+		}
 		newAccount.setApproved(false);
 		newAccount.setTransactions(null);
-		newAccount.setId(newAccount.hashCode());
+		
+		//Required for File implementation
+//		newAccount.setId((int) Math.abs((newAccount.hashCode() * Math.random())));
 
 		
 		if (actDao.getAccountsByUser(u) == null) {
@@ -236,10 +233,12 @@ public class AccountService {
 			accountList = actDao.getAccountsByUser(u);
 			accountList.add(newAccount);
 		}
+		
 		u.setAccounts(accountList);
 		
 		actDao.addAccount(newAccount);
-		
+		System.out.println("\n<^><^><^><^> Account Successfully Created <^><^><^><^>");
+
 		return newAccount;
 	}
 	
@@ -255,11 +254,14 @@ public class AccountService {
 	public boolean approveOrRejectAccount(Account a, boolean approval) {
 		
 		if (!SessionCache.getCurrentUser().get().getUserType().equals(User.UserType.EMPLOYEE)) {
+			System.out.println("\n~~~~~ Current user not authorized to perform action ~~~~~");
 			throw new UnauthorizedException();
 		} else {	
 			a.setApproved(approval);
+			System.out.println("\n<^><^><^> Account approval has been changed <^><^><^>");
+			adao.updateAccount(a);
 		}
 		
-		return false;
+		return a.isApproved();
 	}
 }

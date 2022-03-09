@@ -24,21 +24,21 @@ public class UserDaoDB implements UserDao {
 	
 	
 	public UserDaoDB() {
-		conn = ConnectionUtil.getConnection();
+		conn = ConnectionUtil.getConnectionUtil().getConnection();
 	}
 	
 	
 	
 	public User addUser(User user) {
 
-		String query = "insert into p0_user (first_name, last_name, username, password, user_type) values (?, ?, ?, ?, ?, ?)";
+		String query = "insert into p0_users (first_name, last_name, username, password, user_type) values (?, ?, ?, ?, ?)";
 		try {
 			pstmt = conn.prepareStatement(query);
 			pstmt.setString(1, user.getFirstName());		
 			pstmt.setString(2, user.getLastName());		
 			pstmt.setString(3, user.getUsername());		
 			pstmt.setString(4, user.getPassword());		
-			pstmt.setObject(5, UserType.CUSTOMER);		
+			pstmt.setObject(5, user.getUserType().toString());	
 			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
@@ -52,7 +52,7 @@ public class UserDaoDB implements UserDao {
 	
 	public User getUser(Integer userId) {
 
-		String query = "select * from p0_user where id = " + userId.intValue();
+		String query = "select * from p0_users where user_id = " + userId.intValue();
 		User user = new User();
 		
 		try {
@@ -65,7 +65,7 @@ public class UserDaoDB implements UserDao {
 				user.setLastName(rs.getString("last_name"));
 				user.setUsername(rs.getString("username"));
 				user.setPassword(rs.getString("password"));
-				user.setUserType((UserType)rs.getObject("user_type"));
+				user.setUserType((UserType.valueOf(rs.getString("user_type"))));
 			}
 				
 		} catch (SQLException e) {
@@ -79,24 +79,26 @@ public class UserDaoDB implements UserDao {
 	
 	public User getUser(String username, String pass) {
 
-		String query = "select * from p0_user where username = ? and password = ?";
+		String query = "select * from p0_users where username='" + username + "' and password= '" + pass + "'";
 		User user = new User();
 		
 		try {
-			pstmt = conn.prepareStatement(query);
-			pstmt.setString(1, username);	
-			pstmt.setString(2, pass);			
-			
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+
 			
 			if (rs.next()) {
-				user.setId(rs.getInt("id"));
+				user.setId(rs.getInt("user_id"));
 				user.setFirstName(rs.getString("first_name"));
 				user.setLastName(rs.getString("last_name"));
 				user.setUsername(rs.getString("username"));
 				user.setPassword(rs.getString("password"));
-				user.setUserType((UserType)rs.getObject("user_type"));
+				user.setUserType((UserType.valueOf(rs.getString("user_type"))));
+				return user;
 			}
 				
+		} catch (NullPointerException e) {
+			e.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -108,7 +110,7 @@ public class UserDaoDB implements UserDao {
 	
 	public List<User> getAllUsers() {
 
-		String query = "select * from p0_user";
+		String query = "select * from p0_users";
 		List<User> userList = new ArrayList<User>();
 
 		try {
@@ -117,13 +119,13 @@ public class UserDaoDB implements UserDao {
 			
 			while(rs.next()) {
 				User u = new User();
-				u.setId(rs.getInt("id"));
+				u.setId(rs.getInt("user_id"));
 				u.setFirstName(rs.getString("first_name"));
 				u.setLastName(rs.getString("last_name"));
 				u.setUsername(rs.getString("username"));
 				u.setPassword(rs.getString("first_name"));
-				u.setUserType((UserType)rs.getObject("user_type"));
-			}
+				u.setUserType((UserType.valueOf(rs.getString("user_type"))));
+				userList.add(u);			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -135,7 +137,7 @@ public class UserDaoDB implements UserDao {
 	
 	public User updateUser(User u) {
 
-		String query = "update p0_user set first_name = ?, last_name = ?, username = ?, password = ?, user_type = ? where id = ?";
+		String query = "update p0_users set first_name = ?, last_name = ?, username = ?, password = ?, user_type = ? where user_id = ?";
 		
 		try {
 			pstmt = conn.prepareStatement(query);
@@ -143,7 +145,7 @@ public class UserDaoDB implements UserDao {
 			pstmt.setString(2, u.getLastName());		
 			pstmt.setString(3, u.getUsername());		
 			pstmt.setString(4, u.getPassword());		
-			pstmt.setObject(5, UserType.CUSTOMER);
+			pstmt.setObject(5, u.getUserType().toString());
 			pstmt.setInt(6, u.getId());
 			pstmt.executeUpdate();
 			
@@ -158,7 +160,7 @@ public class UserDaoDB implements UserDao {
 	
 	public boolean removeUser(User u) {
 		
-		String query = "delete from p0_user where id = " + u.getId();
+		String query = "delete from p0_users where user_id = " + u.getId();
 		boolean status = false;
 		
 		try {

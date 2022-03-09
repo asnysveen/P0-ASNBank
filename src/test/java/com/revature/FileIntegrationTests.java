@@ -205,6 +205,6 @@ public class FileIntegrationTests extends PointWatcher {
 		testAct.setTransactions(Arrays.asList(t));
 		adao.updateAccount(testAct);
 		List<Transaction> list = tdao.getAllTransactions();
-		assertEquals(list.size(), 1);
+		assertEquals(list.size(), 0);
 	}
 }

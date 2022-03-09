@@ -141,7 +141,7 @@ public class Account implements Serializable {
 	@Override
 	public String toString() {
 		return "Account [id=" + accountId + ", ownerId=" + ownerId + ", balance=" + balance + ", type=" + type + ", approved="
-				+ approved + ", transactions=" + transactions + "]";
+				+ approved + "]";
 	}
 	
 }

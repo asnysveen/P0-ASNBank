@@ -19,7 +19,7 @@ import com.revature.beans.User;
  */
 public class AccountDaoFile implements AccountDao {
 
-	public static String fileLocation = "/Users/asn/Desktop/Revature/P0-ASNBank-master/Accounts.txt";
+	public static String fileLocation = "Accounts.txt";
 	
 	List<Account> accountList = new ArrayList<Account>();
 	
@@ -36,6 +36,7 @@ public class AccountDaoFile implements AccountDao {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
+				System.out.println("IOException:");
 				e.printStackTrace();
 			}
 			
@@ -44,8 +45,10 @@ public class AccountDaoFile implements AccountDao {
 				objAccOut.writeObject(accountList);
 				objAccOut.close();
 			} catch (FileNotFoundException e) {
+				System.out.println("File not found:");
 				e.printStackTrace();
 			} catch (IOException e) {
+				System.out.println("IOException:");
 				e.printStackTrace();
 			}
 		}
@@ -65,8 +68,10 @@ public class AccountDaoFile implements AccountDao {
 			objAccOut.writeObject(accountList);
 			objAccOut.close();
 		} catch (FileNotFoundException e) {
+			System.out.println("File not found:");
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println("IOException:");
 			e.printStackTrace();
 		} 
 
@@ -82,10 +87,10 @@ public class AccountDaoFile implements AccountDao {
 		for (Account account : accountList) {
 			if (account.getId().equals(actId)) {
 				return account;
-			}
+			} 
 		}
-		
 		return null;
+		
 	}
 
 	
@@ -98,10 +103,13 @@ public class AccountDaoFile implements AccountDao {
 			accountList = (List<Account>) objAccIn.readObject(); 
 			objAccIn.close();
 		} catch (FileNotFoundException e) {
+			System.out.println("File not found:");
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println("IOException:");
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
+			System.out.println("Class not found");
 			e.printStackTrace();
 		}
 		
@@ -112,17 +120,17 @@ public class AccountDaoFile implements AccountDao {
 	
 	public List<Account> getAccountsByUser(User u) {
 		
-		accountList = getAccounts();
-
 		List<Account> userAccounts = new ArrayList<Account>();
+
+		accountList = getAccounts();
 
 		for (Account account : accountList) {
 			if (u.getId().equals(account.getOwnerId())) {
-				return userAccounts;
+				userAccounts.add(account);
 			}
 		}
 		
-		return null;
+		return userAccounts;
 	}
 
 	
@@ -130,14 +138,21 @@ public class AccountDaoFile implements AccountDao {
 	public Account updateAccount(Account a) {
 		accountList = getAccounts();
 		
+		int index = 0;
+		
 		for (Account account : accountList) {
 			if (account.getId().equals(a.getId())) {
-				account.setBalance(a.getBalance());
-				account.setType(a.getType());
-				account.setApproved(a.isApproved());
-				account.setTransactions(a.getTransactions());
+				break;
 			}
+			index++;
 		}
+
+		if (index == accountList.size()) {
+			return null;
+		}
+		
+		accountList.set(index, a);
+		
 		
 		try {
 			objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
@@ -145,11 +160,15 @@ public class AccountDaoFile implements AccountDao {
 			objAccOut.close();
 			return a;
 		} catch (FileNotFoundException e) {
+			System.out.println("File not found:");
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println("IOException:");
 			e.printStackTrace();
 		} 
 		
+		System.out.println("\n<^><^><^><^> User Successfully Updated <^><^><^><^>");
+
 		return a;
 	}
 
@@ -166,16 +185,18 @@ public class AccountDaoFile implements AccountDao {
 				try {
 					objAccOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 					objAccOut.writeObject(accountList);
-					System.out.println("Account Successfully Deleted");
+					System.out.println("\n<^><^><^><^> User Successfully Deleted <^><^><^><^>");
 					objAccOut.close();
-					return true;
 
 				} catch (FileNotFoundException e) {
-					System.out.println("File not found");
+					System.out.println("File not found:");
 					e.printStackTrace();
 				} catch (IOException e) {
-					System.out.println("IOException:" + e.getMessage());
+					System.out.println("IOException:");
+					e.printStackTrace();
 				} 
+				
+				return true;
 			}
 		}
 		

@@ -43,8 +43,10 @@ public class UserDaoFile implements UserDao {
 				objUserOut.writeObject(userList);
 				objUserOut.close();
 			} catch (FileNotFoundException e) {
+				System.out.println("File not found");
 				e.printStackTrace();
 			} catch (IOException e) {
+				System.out.println("IOException:");
 				e.printStackTrace();
 			}
 		}
@@ -58,6 +60,10 @@ public class UserDaoFile implements UserDao {
 //			userList.add(user);
 //		} else {
 		userList = getAllUsers();
+		
+		//Required for File Implementation
+		user.setId(Math.abs(user.hashCode()));
+
 		userList.add(user);
 //		}
 		
@@ -65,12 +71,13 @@ public class UserDaoFile implements UserDao {
 		try {
 			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 			objUserOut.writeObject(userList);
-			//System.out.println("User Successfully Registered");
 			objUserOut.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found" + e.getMessage());
+			System.out.println("File not found");
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException:" + e.getMessage());
+			System.out.println("IOException:");
+			e.printStackTrace();
 		} 
 
 		return user;
@@ -116,11 +123,14 @@ public class UserDaoFile implements UserDao {
 			userList = (List<User>) objUserIn.readObject(); 
 			objUserIn.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
+			System.out.println("File not found");
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
+			System.out.println("IOException:");
+			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			System.out.println("ClassNotFoundException: " + e.getMessage());
+			System.out.println("Class not found:");
+			e.printStackTrace();
 		}
 		
 		return userList;
@@ -154,13 +164,14 @@ public class UserDaoFile implements UserDao {
 		try {
 			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 			objUserOut.writeObject(userList);
-			System.out.println("User Successfully Updated");
+			System.out.println("\n<^><^><^><^> User Successfully Updated <^><^><^><^>");
 			objUserOut.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException:" + e.getMessage());
+			System.out.println("IOException:");
+			e.printStackTrace();
 		} 
 		
 		return u;
@@ -185,13 +196,14 @@ public class UserDaoFile implements UserDao {
 		try {
 			objUserOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
 			objUserOut.writeObject(userList);
-			System.out.println("User Successfully Deleted");
+			System.out.println("\n<^><^><^><^> User Successfully Deleted <^><^><^><^>");
 			objUserOut.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException:" + e.getMessage());
+			System.out.println("IOException:");
+			e.printStackTrace();
 		} 
 			
 		if(userList.contains(u)) {

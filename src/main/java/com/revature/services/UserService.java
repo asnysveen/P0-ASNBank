@@ -33,13 +33,13 @@ public class UserService {
 		User look4User = userDao.getUser(username, password);
 		
 		if (look4User == null) {
-			System.out.println("User Not Found");
+			System.out.println("\n           ~~~~~ User Not Found ~~~~~");
 				throw new InvalidCredentialsException();
 		} else if (!look4User.getPassword().equals(password)) {
-			System.out.println("Incorrect Password");
+			System.out.println("\n        ~~~~~~ Incorrect Password ~~~~~~");
 				throw new InvalidCredentialsException();
 		} else {
-			System.out.println("Login Successful");
+			System.out.println("\n<^><^><^><^><^> Login Successful <^><^><^><^><^>");
 			SessionCache.setCurrentUser(look4User);
 			return look4User;
 		}
@@ -58,12 +58,14 @@ public class UserService {
 		User look4User = userDao.getUser(newUser.getUsername(), newUser.getPassword());
 		
 			if (look4User != null) {
-				System.out.println("Username Already Exists");
+				System.out.println("\n      ~~~~~~ Username Already Exists ~~~~~~");
 				throw new UsernameAlreadyExistsException();
 			} else {
-				newUser.setId(newUser.hashCode());
+				//Needed for File implementation
+//				newUser.setId(Math.abs(newUser.hashCode()));
+				
 				userDao.addUser(newUser);
-				System.out.println("User Successfully Added");
+				System.out.println("\n<^><^><^><^> User Successfully Added <^><^><^><^>");
 			}
 		
 	}

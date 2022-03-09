@@ -29,6 +29,7 @@ public class TransactionDaoFile implements TransactionDao {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {
+				System.out.println("IOException:");
 				e.printStackTrace();
 			}
 			
@@ -37,8 +38,10 @@ public class TransactionDaoFile implements TransactionDao {
 				objTranOut.writeObject(transactionList);
 				objTranOut.close();
 			} catch (FileNotFoundException e) {
+				System.out.println("File not found");
 				e.printStackTrace();
 			} catch (IOException e) {
+				System.out.println("IOException:");
 				e.printStackTrace();
 			}
 		}
@@ -54,13 +57,36 @@ public class TransactionDaoFile implements TransactionDao {
 			transactionList = (List<Transaction>) objTranIn.readObject(); 
 			objTranIn.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("FileNotFoundException: " + e.getMessage());
+			System.out.println("File not found");
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("IOException: " + e.getMessage());
+			System.out.println("IOException:");
+			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			System.out.println("ClassNotFoundException: " + e.getMessage());
+			System.out.println("Class not found:");
+			e.printStackTrace();
 		}
 		return transactionList;
+	}
+	
+	
+	
+	public void updateTransactions(Transaction t) {
+		
+		transactionList = getAllTransactions();
+		transactionList.add(t);
+		
+		try {
+			objTranOut = new ObjectOutputStream(new FileOutputStream(fileLocation));
+			objTranOut.writeObject(transactionList);
+			objTranOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("IOException:");
+			e.printStackTrace();
+		}
 	}
 
 }
